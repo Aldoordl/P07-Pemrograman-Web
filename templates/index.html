@@ -3,141 +3,141 @@
 {% block title %}Dashboard Kantin Real-Time{% endblock %}
 
 {% block content %}
-    <!-- 1. KARTU CUACA KAMPUS REAL-TIME (OPEN-METEO SATELIT) -->
-    <section class="weather-section" id="weather-card">
-        <div class="weather-inner" id="cuaca-container">
-            <div class="weather-loading">
-                <i data-lucide="loader" class="spin"></i> Menghubungkan ke satelit Open-Meteo...
-            </div>
+<!-- 1. KARTU CUACA KAMPUS REAL-TIME (OPEN-METEO SATELIT) -->
+<section class="weather-section" id="weather-card">
+    <div class="weather-inner" id="cuaca-container">
+        <div class="weather-loading">
+            <i data-lucide="loader" class="spin"></i> Menghubungkan ke satelit Open-Meteo...
         </div>
+    </div>
+</section>
+
+<!-- 2. GRID DUA SISI: FORM INPUT (KIRI) & TABEL REAL-TIME (KANAN) -->
+<div class="dashboard-grid">
+
+    <!-- SISI KIRI: FORMULIR TAMBAH MENU (POST) -->
+    <section class="card-panel">
+        <div class="panel-header">
+            <h2>Tambah Menu Kantin</h2>
+            <span class="badge-post">POST /api/menu</span>
+        </div>
+        <p class="panel-desc">Kirim data baru ke server secara asinkron tanpa reload browser.</p>
+
+        <form id="form-tambah-menu" onsubmit="handleTambahMenu(event)" class="form-vertical">
+            <div class="form-group">
+                <label for="input-nama">Nama Menu</label>
+                <input type="text" id="input-nama" placeholder="Contoh: Soto Ayam Lamongan" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-kategori">Kategori</label>
+                    <select id="input-kategori">
+                        <option value="Makanan">Makanan</option>
+                        <option value="Minuman">Minuman</option>
+                        <option value="Camilan">Camilan</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="input-harga">Harga (Rp)</label>
+                    <input type="number" id="input-harga" placeholder="15000" min="1000" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="input-stok">Jumlah Stok Porsi</label>
+                <input type="number" id="input-stok" placeholder="20" min="1" value="20" required>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn-primary">
+                <i data-lucide="plus-circle"></i> Tambah Menu ke Server
+            </button>
+        </form>
+
+        <div id="status-box" class="status-alert hidden"></div>
     </section>
 
-    <!-- 2. GRID DUA SISI: FORM INPUT (KIRI) & TABEL REAL-TIME (KANAN) -->
-    <div class="dashboard-grid">
-        
-        <!-- SISI KIRI: FORMULIR TAMBAH MENU (POST) -->
-        <section class="card-panel">
-            <div class="panel-header">
-                <h2>Tambah Menu Kantin</h2>
-                <span class="badge-post">POST /api/menu</span>
-            </div>
-            <p class="panel-desc">Kirim data baru ke server secara asinkron tanpa reload browser.</p>
-
-            <form id="form-tambah-menu" onsubmit="handleTambahMenu(event)" class="form-vertical">
-                <div class="form-group">
-                    <label for="input-nama">Nama Menu</label>
-                    <input type="text" id="input-nama" placeholder="Contoh: Soto Ayam Lamongan" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="input-kategori">Kategori</label>
-                        <select id="input-kategori">
-                            <option value="Makanan">Makanan</option>
-                            <option value="Minuman">Minuman</option>
-                            <option value="Camilan">Camilan</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="input-harga">Harga (Rp)</label>
-                        <input type="number" id="input-harga" placeholder="15000" min="1000" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="input-stok">Jumlah Stok Porsi</label>
-                    <input type="number" id="input-stok" placeholder="20" min="1" value="20" required>
-                </div>
-
-                <button type="submit" id="btn-submit" class="btn-primary">
-                    <i data-lucide="plus-circle"></i> Tambah Menu ke Server
+    <!-- SISI KANAN: TABEL DAFTAR MENU (GET & DELETE) -->
+    <section class="card-panel">
+        <div class="panel-header">
+            <h2>Daftar Menu Real-Time</h2>
+            <div class="panel-actions">
+                <span class="badge-get">GET</span>
+                <span class="badge-put">PUT</span>
+                <span class="badge-delete">DELETE</span>
+                <button type="button" onclick="muatMenu()" class="btn-refresh" title="Muat Ulang Data">
+                    <i data-lucide="refresh-cw"></i> Refresh
                 </button>
-            </form>
-
-            <div id="status-box" class="status-alert hidden"></div>
-        </section>
-
-        <!-- SISI KANAN: TABEL DAFTAR MENU (GET & DELETE) -->
-        <section class="card-panel">
-            <div class="panel-header">
-                <h2>Daftar Menu Real-Time</h2>
-                <div class="panel-actions">
-                    <span class="badge-get">GET</span>
-                    <span class="badge-put">PUT</span>
-                    <span class="badge-delete">DELETE</span>
-                    <button type="button" onclick="muatMenu()" class="btn-refresh" title="Muat Ulang Data">
-                        <i data-lucide="refresh-cw"></i> Refresh
-                    </button>
-                </div>
             </div>
-            <p class="panel-desc">Tabel otomatis di-update oleh JavaScript DOM tanpa kedip reload.</p>
-
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nama Menu</th>
-                            <th>Kategori</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th style="text-align:center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-menu-body">
-                        <!-- Baris tabel di-generate via JavaScript fetch() -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- RAW JSON VIEWER (DROPDOWN INSPECTOR) -->
-            <details class="json-inspector">
-                <summary>
-                    <span><i data-lucide="code"></i> Lihat Raw JSON Kiriman Server</span>
-                    <span class="arrow">▼</span>
-                </summary>
-                <pre id="raw-json-output">// JSON respon server akan muncul di sini setelah fetch...</pre>
-            </details>
-        </section>
-
-    </div>
-
-    <!-- 3. MODAL DIALOG EDIT MENU (PUT /api/menu/<id>) -->
-    <div id="modal-edit" class="modal-backdrop hidden" onclick="if(event.target === this) tutupModalEdit()">
-        <div class="modal-card">
-            <div class="modal-header">
-                <div>
-                    <h3 id="modal-edit-title">Edit Menu</h3>
-                    <span class="badge-put">PUT /api/menu/&lt;id&gt;</span>
-                </div>
-                <button type="button" class="btn-close" onclick="tutupModalEdit()" title="Tutup">&times;</button>
-            </div>
-            <form id="form-edit-menu" onsubmit="handleEditMenu(event)" class="form-vertical">
-                <input type="hidden" id="edit-id">
-                <div class="form-group">
-                    <label for="edit-nama">Nama Menu</label>
-                    <input type="text" id="edit-nama" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit-harga">Harga (Rp)</label>
-                        <input type="number" id="edit-harga" min="1000" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-stok">Stok Porsi</label>
-                        <input type="number" id="edit-stok" min="0" required>
-                    </div>
-                </div>
-                <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
-                    <button type="button" class="btn-secondary" onclick="tutupModalEdit()">Batal</button>
-                    <button type="submit" id="btn-submit-edit" class="btn-primary">
-                        <i data-lucide="save"></i> Simpan Perubahan (PUT)
-                    </button>
-                </div>
-            </form>
         </div>
+        <p class="panel-desc">Tabel otomatis di-update oleh JavaScript DOM tanpa kedip reload.</p>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nama Menu</th>
+                        <th>Kategori</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th style="text-align:center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabel-menu-body">
+                    <!-- Baris tabel di-generate via JavaScript fetch() -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- RAW JSON VIEWER (DROPDOWN INSPECTOR) -->
+        <details class="json-inspector">
+            <summary>
+                <span><i data-lucide="code"></i> Lihat Raw JSON Kiriman Server</span>
+                <span class="arrow">▼</span>
+            </summary>
+            <pre id="raw-json-output">// JSON respon server akan muncul di sini setelah fetch...</pre>
+        </details>
+    </section>
+
+</div>
+
+<!-- 3. MODAL DIALOG EDIT MENU (PUT /api/menu/<id>) -->
+<div id="modal-edit" class="modal-backdrop hidden" onclick="if(event.target === this) tutupModalEdit()">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <h3 id="modal-edit-title">Edit Menu</h3>
+                <span class="badge-put">PUT /api/menu/&lt;id&gt;</span>
+            </div>
+            <button type="button" class="btn-close" onclick="tutupModalEdit()" title="Tutup">&times;</button>
+        </div>
+        <form id="form-edit-menu" onsubmit="handleEditMenu(event)" class="form-vertical">
+            <input type="hidden" id="edit-id">
+            <div class="form-group">
+                <label for="edit-nama">Nama Menu</label>
+                <input type="text" id="edit-nama" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-harga">Harga (Rp)</label>
+                    <input type="number" id="edit-harga" min="1000" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-stok">Stok Porsi</label>
+                    <input type="number" id="edit-stok" min="0" required>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+                <button type="button" class="btn-secondary" onclick="tutupModalEdit()">Batal</button>
+                <button type="submit" id="btn-submit-edit" class="btn-primary">
+                    <i data-lucide="save"></i> Simpan Perubahan (PUT)
+                </button>
+            </div>
+        </form>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
